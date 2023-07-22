@@ -11,7 +11,17 @@ const turfSchema = new mongoose.Schema({
       venueTypes:{type:Array,required:true},
       prices: {type:Object,require: true},
       images:{type:Array},
+      openingTime:{type:String},
+      closingTime:{type:String},
+      rating:{ type:Number, default:0},
+      reviews:{type:Array},
+      enquiryNumber:{type:String},
       isApprove:{type:Boolean,default:false}
-})
+    },
+    {
+        timestamps:true
+    }
+      
+)
 
-module.exports = mongoose.model ('turfData', turfSchema)
+module.exports = mongoose.model ('turfDatas', turfSchema)

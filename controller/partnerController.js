@@ -1,8 +1,9 @@
 const partnerCollection = require('../model/partnerModel')
+const turfCollection = require('../model/turfModel')
 
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
-
+const nodemailer = require('nodemailer')
 
 
 
@@ -49,15 +50,23 @@ const partnerLogin = async (req, res) => {
 
 
 //<<<<<<<<<<<<<<<<<<<<<<----Partner Registration done here ---->>>>>>>>>>>>>>>>>>>>>
+let partnerdata 
 const partnerSignup = async (req, res) => {
   try {
     console.log("iam in partnersignup dkgsadsadsadsasdhs")
     let { email, phonenumber, turfname, username, password } = req.body;
-    console.log("iam in partnersignup dkgsadsadsadsasdhs", username)
-    const checkusername = await partnerCollection.find({ username: username });
+    const checkusername = await partnerCollection.find({ email: email });
+
+    partnerdata = {
+      username: username,
+      phonenumber: phonenumber,
+      email: email,
+      turfname:turfname,
+      password: password
+    }
 
     if (checkusername.length > 0) {
-      const errors = { username: 'Username already exists' };
+      const errors = { email: 'email already exists' };
       return res.json({ errors, created: false });
     }
 
@@ -79,22 +88,114 @@ const partnerSignup = async (req, res) => {
       const errors = { email: 'Enter a valid email' };
       return res.json({ errors, created: false });
     }
-
-
     else {
-      console.log("hello iam partner else")
-      password = password ? await bcrypt.hash(password, 10) : null;
-
-      const newpartner = new partnerCollection({
-        email, phonenumber, turfname, username, password
-      })
-      await newpartner.save();
-
-      res.json({ user: data, created: true });
+      const otp= { checkotp: 'Enter a otp' }   
+      res.json({ otp, created: false });
+      await sendOtpToPartner(partnerdata);
     }
   } catch (error) {
     res.json({ error, created: false });
   }
 };
 
-module.exports = { partnerSignup, partnerLogin }
+
+
+//<<<<<<<<<<<<<<  WHEN USER SIGNUP OTP PAGE APPEAR AND THIS FUNCTION WORKS >>>>>>>>>>
+let OtpCode;
+const sendOtpToPartner = async function (req, res, next) {
+   try {
+    console.log(partnerdata);
+    OtpCode = Math.floor(100000 + Math.random() * 988800)
+    otp = OtpCode
+    otpEmail = partnerdata.email
+    let mailTransporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "fammsstore11@gmail.com",
+        pass: 'paiteegvfdjqecwk',       
+      }
+    })
+    let docs = {
+      from: "AoneTurf@gmail.com",
+      to: otpEmail,
+      subject: "A one Turf Varification",
+      html: `<p style="font-size:24px;font-weight:bold;">${OtpCode}</p><p> A one Turf verification code, Do not share with others</p>`  
+    }
+  
+    mailTransporter.sendMail(docs, (err) => {
+      if (err) {
+        console.log(err)
+      }
+    })
+   } catch (error) {
+    console.log(error)
+    res.render('404')
+   }
+}
+
+//<<<<<<<<<<<<<<  SUBMIT BUTTON OF OTP PAGE >>>>>>>>>>
+const otpPartnerSubmit = async function (req, res, next) {
+  try {
+    console.log("hello iam otp submit")
+    const {otp}=req.body
+    console.log(otp,"TYPED OTP")
+    console.log(OtpCode ,"OTPCODE")
+    if (OtpCode == otp)
+    {
+      let {username, phonenumber,turfname, password, email  }= partnerdata
+      password = password ? await bcrypt.hash(password, 10) : null;
+      const newpartner = new partnerCollection({
+        email, phonenumber, turfname, username, password
+      })
+      const data=await newpartner.save();
+      res.json({ user: data, created: true });
+    }
+    else {
+      const errors= "Wrong Otp"
+      res.json({ errors, created: false });
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+
+
+
+
+//<<<<<<<<<<<<<<  RESEND OTP   >>>>>>>>>>
+const otpResendPartner = async function (req, res, next) {
+  try {
+    const otp= { checkotp: 'Enter a otp' }  
+    res.json({otp});
+    await sendOtpToPartner();  
+  } catch (error) {
+    console.log(error)
+  } 
+}
+
+
+//<<<<<<<<<<<<<<  MANAGER TURF VIEW >>>>>>>>>>
+const ManagerTurfView = async (req, res) => {
+  try {
+    console.log("hello iam all turfs");
+    const partnerID = req.params.id;
+    console.log(partnerID)
+    if (partnerID) {
+      const turf = await turfCollection.find({ partnerId: partnerID });
+      if (turf) {
+        return res.json({ data: turf });
+      } else {
+        return res.status(404).json({ message: "Turf not found" });
+      }
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+
+module.exports = { partnerSignup,otpPartnerSubmit, partnerLogin,otpResendPartner,
+  ManagerTurfView, }

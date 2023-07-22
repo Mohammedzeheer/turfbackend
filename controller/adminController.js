@@ -236,12 +236,36 @@ const blockUser = async (req, res) => {
     }else{
         return res.status(404).json({ message: "Users are  not found" })
     }
-
   }
-
+ 
+  //APPROVE TURFS BY ADMIN
+  const approveTurfs = async (req, res) => {
+    try {
+      console.log("hello im approveturfs-----------ddfdfdd")
+      const {userId}=req.body
+      const userData = await turfCollection.findOne({ _id: userId});
+      console.log(userData,"approve")
+      if (userData) {
+        const data = await turfCollection.updateOne(
+          { _id: userData._id },
+          { $set: { isApprove: true } }
+        );
+        if (data.modifiedCount > 0) {
+          return res.json({ data, message: "Manager Approved" });
+        } else {
+          return res.status(404).json({ message: "User not found" });
+        }
+      } else {
+        return res.status(404).json({ message: "User not found" });
+      }
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  };
 module.exports= {
        adminLogin ,
        userList ,blockUser,UnBlockUser,
        partnerList , approvePartner,blockManager,UnBlockManager,
-       TurfList
+       TurfList,approveTurfs
       }

@@ -5,7 +5,10 @@ const userSchema = new mongoose.Schema({
       password :{type:String,required:true},
       email:{type:String},
       phonenumber:{type:Number},
-      isBlock:{type:Boolean,default:false}
+      isBlock:{type:Boolean,default:false},
+      image:{type:String},
+      wallet:{type:Number,default:0},
+      address:{type:String}
 })
 
 module.exports = mongoose.model ('users', userSchema)

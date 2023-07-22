@@ -32,13 +32,8 @@ const AddTurf = async (req, res) => {
       console.log('userId:', userId);
       
       // const files = req.files?.photos?.map((file) => file.filename);
-      const files = req.files?.map((file) => file.filename);
-      
-     console.log(files,"ghassdgsddsdssdsdd files")
-      // const files = req.files; // This will contain the uploaded files
-      // console.log(req.file," req files console ");
-
-
+      const files = req.files?.map((file) => file.filename);  
+   
       await turfCollection.create({
         partnerId:userId,
         courtName,
@@ -74,6 +69,10 @@ const imageUpload= (req,res,next)=>{
         console.log(err);
     }
 }
+
+
+
+
 
 
 module.exports={AddTurf , imageUpload}

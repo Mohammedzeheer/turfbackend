@@ -175,6 +175,16 @@ const otpResendPartner = async function (req, res, next) {
 }
 
 
+const partnerProfile = async (req,res)=>{
+  const ID = req.params.id;
+  console.log(ID)
+  const data = await partnerCollection.findById({_id:ID})
+  console.log(data , "iam partner datas")
+  return res.json({data});
+}
+
+
+
 //<<<<<<<<<<<<<<  MANAGER TURF VIEW >>>>>>>>>>
 const ManagerTurfView = async (req, res) => {
   try {
@@ -198,4 +208,4 @@ const ManagerTurfView = async (req, res) => {
 
 
 module.exports = { partnerSignup,otpPartnerSubmit, partnerLogin,otpResendPartner,
-  ManagerTurfView, }
+  ManagerTurfView,partnerProfile, }

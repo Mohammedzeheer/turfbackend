@@ -9,8 +9,10 @@ partnerRouter.post('/partnersignup',partnerController.partnerSignup)
 partnerRouter.post('/partnerlogin',partnerController.partnerLogin)
 partnerRouter.post('/otppartnersubmit', partnerController.otpPartnerSubmit)
 partnerRouter.post('/resendpartnerotp', partnerController.otpResendPartner)
+partnerRouter.get('/partnerprofile/:id', partnerController.partnerProfile)
 
-partnerRouter.post('/addturf',upload.array('photos',5),turfController.AddTurf)
+
+partnerRouter.post('/addturf',upload.array('photos',10),turfController.AddTurf)
 
 partnerRouter.get('/partnerturfview/:id',partnerController.ManagerTurfView)
 partnerRouter.get('/profile/:id',partnerController.ManagerTurfView)

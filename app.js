@@ -1,12 +1,13 @@
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
-const cookieParser = require('cookie-parser');
+// const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-// const env= require('dotenv').config();
-const mongoose= require('mongoose')
+const mongoose = require('./config/database'); 
 let cors= require('cors')
 const bodyParser = require('body-parser');
+require('dotenv').config() 
+
 
 const adminRouter = require('./routes/admin');
 const partnerRouter=require('./routes/partner')
@@ -18,14 +19,15 @@ const app = express();
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+// app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }));
+// app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.json());
 
 // Parse application/json
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
 
 app.use(cors({
   origin: ["http://localhost:3000"],
@@ -39,30 +41,6 @@ app.use('/', userRouter);
 app.use('/admin', adminRouter);
 app.use('/partner',partnerRouter)
 
-// // catch 404 and forward to error handler
-// app.use(function(req, res, next) {
-//   next(createError(404));
-// });
-
-// mongoose.connect(process.env.serverConnection, {useNewUrlParser: true});
-mongoose.set('strictQuery',false);
-mongoose.connect('mongodb+srv://zeheerzak:313786aA@cluster0.qujhexw.mongodb.net/turf', {useNewUrlParser: true})
-.then(() => {
-  console.log("Database Connected");
-}).catch((error) => {
-  console.log("datatbase error",error.message)
-})
-
-// mongodb+srv://zeheerzak:313786aA@cluster0.qujhexw.mongodb.net/turf
-// mongodb+srv://zeheerzak:313786aA@cluster0.ydbdotz.mongodb.net/turf   //new datABASE
-
-// mongoose.connect('mongodb://127.0.0.1:27017/turf', {useNewUrlParser: true})
-// .then(() => {
-//   console.log("Database Connected");
-// }).catch((error) => {
-//   console.log(error.message)
-// })
-
 
 // error handler
 app.use(function(err, req, res, next) {
@@ -75,8 +53,24 @@ app.use(function(err, req, res, next) {
 });
 
 
-app.listen(4000,()=>{
+app.listen(process.env.PORT,()=>{
   console.log("server started")
 })
 
 module.exports = app;
+
+
+
+
+
+
+
+
+// mongodb+srv://zeheerzak:313786aA@cluster0.qujhexw.mongodb.net/turf
+// mongodb+srv://zeheerzak:313786aA@cluster0.ydbdotz.mongodb.net/turf   //new datABASE
+// mongoose.connect('mongodb://127.0.0.1:27017/turf', {useNewUrlParser: true})
+// .then(() => {
+//   console.log("Database Connected");
+// }).catch((error) => {
+//   console.log(error.message)
+// })

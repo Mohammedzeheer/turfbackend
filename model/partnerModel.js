@@ -6,6 +6,8 @@ const partnerSchema = new mongoose.Schema({
       turfname:{type:String,required:true},
       username: {type:String,require: true},
       password :{type:String,required:true},
+      address:{type:String},
+      image:{type:String},
       isApprove:{type:Boolean,default:false},
       isBlock:{type:Boolean,default:false},
 })

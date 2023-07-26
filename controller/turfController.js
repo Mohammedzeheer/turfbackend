@@ -10,6 +10,8 @@ const AddTurf = async (req, res) => {
       // Parse the JSON strings into JavaScript objects
       const venueTypes = JSON.parse(req.body.venueTypes);
       const prices = JSON.parse(req.body.prices);
+      // const venueTypes = req.body.venueTypes;
+      // const prices = req.body.prices;
   
       const {
         courtName,
@@ -19,6 +21,8 @@ const AddTurf = async (req, res) => {
         description,
         location,
         userId,
+        openingTime,
+        closingTime,
       } = req.body;
   
       console.log('Court Name:', courtName);
@@ -30,7 +34,10 @@ const AddTurf = async (req, res) => {
       console.log('Venue Types:', venueTypes);
       console.log('Prices:', prices);
       console.log('userId:', userId);
-      
+      console.log('openingTime:', openingTime);
+      console.log('closingTime:', closingTime);
+
+
       // const files = req.files?.photos?.map((file) => file.filename);
       const files = req.files?.map((file) => file.filename);  
    
@@ -45,7 +52,9 @@ const AddTurf = async (req, res) => {
         venueTypes,
         prices,
         //photos: files.map((file) => file.filename),
-        images:files
+        images:files,
+        openingTime,
+        closingTime
       });
   
       // Send a JSON response or redirect as needed

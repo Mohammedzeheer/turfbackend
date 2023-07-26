@@ -4,6 +4,7 @@ const turfCollection = require('../model/turfModel')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const nodemailer = require('nodemailer')
+const { objectId } = require('mongodb');
 
 
 
@@ -185,6 +186,46 @@ const partnerProfile = async (req,res)=>{
 
 
 
+const updateProfile1 = async (req,res)=>{
+  const ID = req.params.id;
+  console.log(ID)
+  const data = await partnerCollection.findById({_id:ID})
+  console.log(data , "iam partner datas")
+  return res.json({data});
+}
+
+
+const updateProfile=async (req,res,next)=>{
+  try{
+    console.log("hello iam partnerprofile update")
+      console.log(req.body,"formadata")
+
+      let {username,phonenumber,address,partnerId} = req.body.formData
+     const data=await partnerCollection.findByIdAndUpdate({_id:partnerId},{$set:{address:address,phonenumber:phonenumber,username:username}})
+     console.log(data)
+          res.json({status:true,data})
+  }catch(err){
+      console.log(err);
+  }
+}
+
+
+
+const profilePhotoUpload=async(req,res,next)=>{
+  try{
+    console.log("hello iam partner photo upload")
+    console.log(req.body)
+      const {partnerId}=req.body
+      const imgUrl=req.file.filename
+      console.log(imgUrl)
+      await partnerCollection.updateOne({_id:partnerId},{$set:{image:imgUrl}}).then(()=>{
+          res.json({status:true,imageurl:imgUrl})
+      })
+  }catch(err){
+      console.log(err);
+  }
+}
+
 //<<<<<<<<<<<<<<  MANAGER TURF VIEW >>>>>>>>>>
 const ManagerTurfView = async (req, res) => {
   try {
@@ -206,6 +247,30 @@ const ManagerTurfView = async (req, res) => {
 };
 
 
+const TurfDetailView = async (req, res) => {
+  try {
+
+    console.log("hello iam all turfs detail page -------------------------------");
+    const turfId = req.params.id;
+    console.log(turfId)
+    if (turfId) {
+      // const objectId = new ObjectId(turfId);
+      const turf = await turfCollection.findById(turfId);
+      console.log(turf,"turfs ----------------------------------------------")
+      if (turf) {
+        return res.json({ data: turf });
+      } else {
+        return res.status(404).json({ message: "Turf not found" });
+      }
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 
 module.exports = { partnerSignup,otpPartnerSubmit, partnerLogin,otpResendPartner,
-  ManagerTurfView,partnerProfile, }
+  ManagerTurfView,partnerProfile,updateProfile,profilePhotoUpload,
+  TurfDetailView
+}

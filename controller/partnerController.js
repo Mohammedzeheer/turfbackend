@@ -5,7 +5,8 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const nodemailer = require('nodemailer')
 const { objectId } = require('mongodb');
-
+const cloudinary = require('../helpers/Cloudinary')
+const dotenv =require('dotenv').config()
 
 
 //<<<<<<<<<<<<<<<<<<<<<<----Partner lOGIN FUNCTION here ---->>>>>>>>>>>>>>>>>>>>>
@@ -210,21 +211,24 @@ const updateProfile=async (req,res,next)=>{
 }
 
 
-
+//<<<<<<<<<<<<<<  PRofile upload of partner >>>>>>>>>>
 const profilePhotoUpload=async(req,res,next)=>{
   try{
     console.log("hello iam partner photo upload")
     console.log(req.body)
       const {partnerId}=req.body
-      const imgUrl=req.file.filename
-      console.log(imgUrl)
-      await partnerCollection.updateOne({_id:partnerId},{$set:{image:imgUrl}}).then(()=>{
-          res.json({status:true,imageurl:imgUrl})
+      const result = await cloudinary.uploader.upload(req.file.path);
+      // const imgUrl=req.file.filename
+      // console.log(imgUrl)
+      await partnerCollection.updateOne({_id:partnerId},{$set:{image:result.secure_url}}).then(()=>{
+          res.json({status:true,imageurl:result.secure_url})
       })
   }catch(err){
       console.log(err);
   }
 }
+
+
 
 //<<<<<<<<<<<<<<  MANAGER TURF VIEW >>>>>>>>>>
 const ManagerTurfView = async (req, res) => {

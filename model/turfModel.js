@@ -14,7 +14,13 @@ const turfSchema = new mongoose.Schema({
       openingTime:{type:String},
       closingTime:{type:String},
       rating:{ type:Number, default:0},
-      reviews:{type:Array},
+      //reviews:{type:Array},
+      reviews:[{
+        rating:{type:Number},
+        review:{type:String},
+        userId:{type: mongoose.Schema.Types.ObjectId,ref: "users"},
+        createdAt:{type:Date,default:Date.now()}
+      }],
       enquiryNumber:{type:String},
       isApprove:{type:Boolean,default:false}
     },

@@ -6,6 +6,10 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer')
 const cloudinary = require('../helpers/Cloudinary')
 const dotenv =require('dotenv').config()
+const { ObjectId } = require('mongodb');
+var mongoose = require('mongoose');
+const { Types } = require('mongoose');
+
 
 // let upload= require('../middleware/photo')
 
@@ -253,17 +257,15 @@ const AllturfView = async (req, res) => {
 };
 
 
+
 const reviewSubmit = async (req, res) => {
   try {
-      const { id, name, review, rating } = req.body;
+      const { id, review, rating,userId } = req.body;
       console.log(req.body)
       const turf = await turfCollection.findById({ _id: id });
-      const newReview = {
-          name,
-          review,
-          rating,
-      };
-      turf.reviews.push(newReview);
+      turf.reviews.push({userId,review,rating});
+
+
       const ratings = turf.reviews.map((review) => review.rating);
       const averageRating = ratings.reduce((a, b) => a + b) / ratings.length;
       turf.rating = averageRating;
@@ -276,18 +278,22 @@ const reviewSubmit = async (req, res) => {
   }
 }
 
+
+
 const getReviews = async (req, res) => {
   try {
-      console.log("firstfirstfirstfirst")
       const turfId = req.params.id
-      console.log(turfId, '///////')
-      const reviews = await turfCollection.findById({ _id: turfId })
+      const reviews = await turfCollection.findById({ _id: turfId }).populate('reviews.userId')
+      console.log(reviews,"------------------REVIEWS-----------------------")
       res.status(200).json({ reviews:reviews.reviews.reverse() })
   } catch (error) {
       console.log(error);
       res.status(500)
   }
 }
+
+
+
 
  const bookingSlot = async (req, res) => {
   const ID = req.params.id
@@ -315,3 +321,46 @@ module.exports = {userSignup,userLogin,userHome,userProfile,
 }
 
 
+
+
+
+
+// const reviewSubmit1 = async (req, res) => {
+//   try {
+//       const { id, name, review, rating,image } = req.body;
+//       console.log(req.body)
+//       const turf = await turfCollection.findById({ _id: id });
+//       const newReview = {
+//           id,
+//           name,
+//           review,
+//           rating,
+//           image
+//       };
+//       turf.reviews.push(newReview);
+//       const ratings = turf.reviews.map((review) => review.rating);
+//       const averageRating = ratings.reduce((a, b) => a + b) / ratings.length;
+//       turf.rating = averageRating;
+//       await turf.save();
+//       res.status(200).json(turf);
+//   }
+//   catch (err) {
+//       console.error(err);
+//       res.status(500).json({ error: 'Server error' });
+//   }
+// }
+
+
+
+
+
+// const getReviews = async (req, res) => {
+//   try {
+//       const turfId = req.params.id
+//       const reviews = await turfCollection.findById({ _id: turfId })
+//       res.status(200).json({ reviews:reviews.reviews.reverse() })
+//   } catch (error) {
+//       console.log(error);
+//       res.status(500)
+//   }
+// }

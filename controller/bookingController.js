@@ -13,10 +13,8 @@ const bookingSlot = async (req, res) => {
     bookDate.setMinutes(0);
     bookDate.setSeconds(0);
     bookDate.setMilliseconds(0);
-    console.log('hello iam booking slot-----2',ID,date,bookDate )
     try {
         const booking = await bookingCollection.find({ turf: ID,bookDate })
-        console.log('hello iam booking slot-----3',booking )
         return res.status(200).json(booking)
     } catch (error) {
         console.log(error)
@@ -113,6 +111,20 @@ if (result) {
 
 
 
+const BookingHistoryUser = async (req,res)=>{
+    console.log('--------hello iam booking history')
+    const userId = req.params.id
+    try {
+       const data= await bookingCollection.find({user:userId}).populate('user').populate('turf')
+       console.log(data, 'booking history')
+       res.status(200).json(data);     
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+
 module.exports ={
-    paymentProcess,bookTurf,bookingSuccess,bookingSlot,bookingFailed
+    paymentProcess,bookTurf,bookingSuccess,bookingSlot,bookingFailed,
+    BookingHistoryUser
 }

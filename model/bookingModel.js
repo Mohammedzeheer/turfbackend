@@ -22,7 +22,11 @@ const bookingSchema = new mongoose.Schema(
     },
     price: {
       type: Number,
-      //required: true
+      required: true
+    },
+    slot: {
+      type: String,
+      // required: true
     },
     payment: {
       type: String,

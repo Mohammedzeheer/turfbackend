@@ -18,5 +18,9 @@ AdminRouter.post('/unblockpartner',adminController.UnBlockManager)
 AdminRouter.get('/turfs',adminController.TurfList)
 AdminRouter.post('/approveTurfs',adminController.approveTurfs)
 
+AdminRouter.get('/bookingList',adminController.bookingLists)
+
+
+
 
 module.exports = AdminRouter;

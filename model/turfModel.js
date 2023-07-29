@@ -1,7 +1,7 @@
 const mongoose= require('mongoose')
 
 const turfSchema = new mongoose.Schema({
-      partnerId: { type: mongoose.Types.ObjectId, required: true },
+      partnerId: { type: mongoose.Types.ObjectId, ref: 'partners' },
       courtName:{type:String,require: true},
       mobileNumber:{type:String,require: true},
       state:{type:String,require: true},

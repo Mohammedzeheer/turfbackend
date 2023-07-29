@@ -32,6 +32,7 @@ userRouter.post("/booking-success/:id", bookingController.bookingSuccess);
 userRouter.post("/booking-failed/:id", bookingController.bookingFailed);
 userRouter.get("/bookings_user/:id", bookingController.BookingHistoryUser);
 
+
 // paymentProcess,bookTurf,bookingSuccess,bookingSlot
 // router.post('/booking',userAuthentication,bookTurf)
 // router.get('/payment/:id', paymentProcess);

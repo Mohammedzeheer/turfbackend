@@ -2,6 +2,7 @@ const adminCollection = require("../model/adminModel");
 const userCollection = require("../model/userModel");
 const partnerCollection = require("../model/partnerModel");
 const turfCollection = require("../model/turfModel");
+const bookingCollection= require ('../model/bookingModel')
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
@@ -240,6 +241,14 @@ const approveTurfs = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+
+const bookingLists = async(req,res)=>{
+  const response= await bookingCollection.find({}).populate('turf').populate('user')
+  res.status(200).json({response})
+}
+
+
 module.exports = {
   adminLogin,
   userList,
@@ -251,4 +260,5 @@ module.exports = {
   UnBlockManager,
   TurfList,
   approveTurfs,
+  bookingLists
 };

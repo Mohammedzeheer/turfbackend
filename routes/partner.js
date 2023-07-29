@@ -2,6 +2,7 @@ const express = require('express');
 const partnerRouter = express.Router();
 const partnerController= require('../controller/partnerController')
 const turfController=require('../controller/turfController')
+const bookingController = require('../controller/bookingController')
 const upload= require('../middleware/image')
 
 
@@ -17,6 +18,8 @@ partnerRouter.post('/addturf',upload.array('photos',10),turfController.AddTurf)
 partnerRouter.get('/partnerturfview/:id',partnerController.ManagerTurfView)
 partnerRouter.get('/turfDetailview/:id',partnerController.TurfDetailView)
 partnerRouter.get('/profile/:id',partnerController.ManagerTurfView)
+
+partnerRouter.get('/bookingsData/:id',bookingController.BookingsHistoryPartner)
 
 
 

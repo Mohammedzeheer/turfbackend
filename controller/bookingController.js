@@ -31,7 +31,7 @@ const bookingSlot = async (req, res) => {
         
         // console.log(req.body ,token,'hello iam booking turf------------------------------------2')
         // console.log(key)
-        const { ID, date, time, userId,price } = req.body;
+        const { ID, date, time, userId,price,slot } = req.body;
         console.log(price, '----------------------------------------price')
         const turf = await turfCollection.findById({ _id: ID });
         // const price = turf.prices;
@@ -47,6 +47,7 @@ const bookingSlot = async (req, res) => {
             bookDate,
             time,
             price,
+            slot
         });
         res.status(200).json(newBooking);
     } catch (error) {
@@ -124,7 +125,20 @@ const BookingHistoryUser = async (req,res)=>{
 }
 
 
+
+const BookingsHistoryPartner = async (req,res)=>{
+    const partnerId = req.params.id
+    try {
+       const data= await bookingCollection.find({user:partnerId}).populate('user').populate('turf')
+       console.log(data, 'booking history')
+       res.status(200).json(data);     
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+
 module.exports ={
     paymentProcess,bookTurf,bookingSuccess,bookingSlot,bookingFailed,
-    BookingHistoryUser
+    BookingHistoryUser,BookingsHistoryPartner
 }

@@ -6,7 +6,7 @@ const auth = (req, res, next) => {
 
   if (token) {
     try {
-      const decode = JWT.verify(token, process.env.TOKEN_SECRET); 
+      const decode = JWT.verify(token, process.env.USER_TOKEN_SECRET); 
       console.log(decode);
       if (decode.exp > Date.now() / 1000) {
         console.log("success");

@@ -1,9 +1,8 @@
 const userCollection = require('../model/userModel')
 const turfCollection= require('../model/turfModel')
 const bookingCollection = require('../model/bookingModel')
-const jwt = require('jsonwebtoken');
 const  paymentStripe  = require('../Helpers/Stripe.js') 
-
+const jwt = require('jsonwebtoken');
 
 const bookingSlot = async (req, res) => {
     const ID = req.params.id
@@ -24,15 +23,17 @@ const bookingSlot = async (req, res) => {
 
  const bookTurf = async (req, res) => {
     try {
-        let token = req.headers.authorization
-        
-        console.log(token,'hello iam booking turf--------------------------------')
-        //   let key = jwt.verify(token, process.env.TOKEN_SECRET);
+        // let token = req.headers.authorization;    
+        // console.log(token,'hello iam booking turf  ------------TOKEN ------------------')
+        // console.log(process.env.USER_TOKEN_SECRET,'secret key---------------------')
+        //   const key = jwt.verify(token,process.env.USER_TOKEN_SECRET);
+         
+        //   console.log(key, '----------------------------------------key')
         
         // console.log(req.body ,token,'hello iam booking turf------------------------------------2')
         // console.log(key)
-        const { ID, date, time, userId,price,slot } = req.body;
-        console.log(price, '----------------------------------------price')
+        const { ID, date, time, userId,price,slot} = req.body;
+
         const turf = await turfCollection.findById({ _id: ID });
         // const price = turf.prices;
         // const userId = key.userId;
@@ -78,6 +79,7 @@ const bookingSlot = async (req, res) => {
 };
 
  const bookingSuccess = async (req, res) => {
+    console.log('hello iam booking success ---------------------------------------------------- ');
     const ID = req.params.id;
     try {
         const result = await bookingCollection

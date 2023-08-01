@@ -32,7 +32,7 @@ const adminLogin = async (req, res) => {
     if (admin) {
       if (admin.password === password) {
         console.log("Logged in successfully");
-        const token = jwt.sign({ sub: admin._id }, "Key", { expiresIn: "3d" });
+        const token = jwt.sign({ sub: admin._id }, process.env.ADMIN_TOKEN_SECRET, { expiresIn: "3d" });
         res.json({ admin: true, token });
       } else {
         console.log("Invalid Password");

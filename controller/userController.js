@@ -27,6 +27,25 @@ const userData = async (req,res)=>{
 }
 
 
+const checkUserBlock = async (req, res, next) => {
+  try {
+      console.log('hello iam is block chceking',req.body)
+    const { email } = req.body;
+    const userData = await userCollection.findOne({ email: email });
+    if (!userData) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    if (userData.isBlock) {
+      return res.status(403).json({ message: "User is blocked" });
+    }
+
+    next(); 
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 
   //--------User Login Function here --------------------------
@@ -51,10 +70,9 @@ const userLogin = async (req,res)=>{
             let auth= password ? await bcrypt.compare(password,user.password) : null;
             console.log(auth)
             if(auth){
-                const token=jwt.sign({sub:user._id},process.env.TOKEN_SECRET,{expiresIn:'3d'}) //adding topken here
+                const token=jwt.sign({id:user._id},process.env.USER_TOKEN_SECRET,{expiresIn:'3d'}) //adding topken here
                 res.json({login:true,token,user})
             }else{
-
                 const errors={password:"incorrect password"}
                 res.json({ errors, created: false })
             }
@@ -317,7 +335,7 @@ const getReviews = async (req, res) => {
 
 module.exports = {userSignup,userLogin,userHome,userProfile, 
   AllturfView, TurfSingleView,
-  otpSubmit,resendOtp , userData,photoUpload,bookingSlot,reviewSubmit,getReviews
+  otpSubmit,resendOtp , userData,photoUpload,bookingSlot,reviewSubmit,getReviews,checkUserBlock
 }
 
 

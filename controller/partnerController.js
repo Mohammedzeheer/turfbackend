@@ -31,7 +31,7 @@ const partnerLogin = async (req, res) => {
         let auth = password ? await bcrypt.compare(password, partner.password) : null;
         console.log(auth);
         if (auth) {
-          const token = jwt.sign({ sub: partner._id }, "Key", { expiresIn: "3d" }); // adding token here
+          const token = jwt.sign({ sub: partner._id },process.env.PARTNER_TOKEN_SECRET, { expiresIn: "3d" }); // adding token here
           console.log(token);
           res.json({ login: true, token, partner });
         } else {

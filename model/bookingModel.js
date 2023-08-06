@@ -12,6 +12,11 @@ const bookingSchema = new mongoose.Schema(
       ref: "turfDatas",
       required: true
     },
+    partner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "partners",
+      required: true
+    },
     bookDate: {
       type: String,
       required: true
@@ -36,7 +41,14 @@ const bookingSchema = new mongoose.Schema(
     cancelBooking: {
       type: Boolean,
       default: false
-    }
+    },
+    cancelReason: {
+      type: String,
+    },
+    paymentMethod: {
+      type: String,
+      //required: true
+    },
   },
   {
     timestamps: true

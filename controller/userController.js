@@ -19,7 +19,7 @@ const userHome = (req,res)=>{
 }
 
 const userData = async (req,res)=>{
-  const ID = req.params.id;
+  const ID = req.UserId
   console.log(ID)
   const data = await userCollection.findById({_id:ID})
   console.log(data , "iam user datas")
@@ -219,10 +219,11 @@ const resendOtp = async function (req, res, next) {
 const photoUpload=async(req,res,next)=>{
   try{
     console.log("hello iam photo upload")
-      const {userId}=req.body
+      const userId=req.UserId
+
       const result = await cloudinary.uploader.upload(req.file.path);
+      
       console.log(result," result of photo")    
-      // const imgUrl=req.file.filename
       await userCollection.updateOne({_id:userId},{$set:{image:result.secure_url}}).then(()=>{
           res.json({status:true,imageurl:result.secure_url})
       })
@@ -234,10 +235,10 @@ const photoUpload=async(req,res,next)=>{
 const userProfile=async (req,res,next)=>{
   try{
     console.log("hello iam userprofile")
-      // const userId=req.params.id;
+      const userId=req.UserId
       console.log(req.body,"formadata")
 
-      let {username,phonenumber,address,userId} = req.body.formData
+      let {username,phonenumber,address} = req.body.formData
      const data=await userCollection.findByIdAndUpdate({_id:userId},{$set:{address:address,username:username}})
      console.log(data)
           res.json({status:true,data})
@@ -278,9 +279,9 @@ const AllturfView = async (req, res) => {
 
 const reviewSubmit = async (req, res) => {
   try {
-      const { id, review, rating,userId } = req.body;
-      console.log(req.body)
-      const turf = await turfCollection.findById({ _id: id });
+      const { turfId, review, rating,userId } = req.body;
+      console.log(req.body,'-------------------------------reviewSubmit')
+      const turf = await turfCollection.findById({ _id: turfId });
       turf.reviews.push({userId,review,rating});
 
 

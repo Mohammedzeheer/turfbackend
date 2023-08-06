@@ -4,7 +4,8 @@ const partnerController= require('../controller/partnerController')
 const turfController=require('../controller/turfController')
 const bookingController = require('../controller/bookingController')
 const upload= require('../middleware/image')
-
+const jwtPartner= require('../middleware/partnerJWT')
+// import jwtPartner from '../middleware/partnerJWT';
 
 partnerRouter.post('/partnersignup',partnerController.partnerSignup)
 partnerRouter.post('/partnerlogin',partnerController.partnerLogin)
@@ -21,6 +22,8 @@ partnerRouter.get('/profile/:id',partnerController.ManagerTurfView)
 
 partnerRouter.get('/bookingsData/:id',bookingController.BookingsHistoryPartner)
 
+// partnerRouter.get('/getCounts',jwtPartner,partnerController.totalCount)
+partnerRouter.get('/getCounts', jwtPartner, partnerController.totalCount);
 
 
 

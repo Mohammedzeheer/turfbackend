@@ -1,5 +1,7 @@
 const partnerCollection = require('../model/partnerModel')
 const turfCollection = require('../model/turfModel')
+const bookingCollection=require('../model/bookingModel')
+const mongoose = require('mongoose');
 
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
@@ -31,7 +33,7 @@ const partnerLogin = async (req, res) => {
         let auth = password ? await bcrypt.compare(password, partner.password) : null;
         console.log(auth);
         if (auth) {
-          const token = jwt.sign({ sub: partner._id },process.env.PARTNER_TOKEN_SECRET, { expiresIn: "3d" }); // adding token here
+          const token = jwt.sign({ partnerId: partner._id }, process.env.PARTNER_TOKEN_SECRET, { expiresIn: "3d" });
           console.log(token);
           res.json({ login: true, token, partner });
         } else {
@@ -274,7 +276,96 @@ const TurfDetailView = async (req, res) => {
 };
 
 
+ const totalCount = async (req, res) => {
+  try {
+      const partner = req.partnerId
+      // const turf = mongoose.Types.ObjectId(req.partnerId); // Convert turf to ObjectId
+    
+      const Turf = await turfCollection.find({partnerId:partner })
+      if (!Turf) return res.status(400).json({ message: "No Turfs Found " })
+      const turfId = Turf._id
+
+      const bookingCount = await bookingCollection.findOne({partner:partner, payment: "Success" }).count() 
+      const userCount = await bookingCollection.find({ turfId }).distinct('user') 
+
+      const query = { cancelBooking: false, partner: partner };
+      const projection = { _id: 0, price: 1};
+      const bookings = await bookingCollection.find(query, projection);
+      const TotalRevenue = bookings.reduce(
+        (accumulator, item) => accumulator + item.price,
+        0
+      );
+
+      const dayWiseBookings = await bookingCollection.aggregate([
+          {
+              $match: { payment:"Success"}
+          },
+          {
+              $group: {
+                  _id: { partner: "$partner", bookDate: "$bookDate" },
+                  count: { $sum: 1 },                
+              },
+          },
+          {
+              $sort: { bookDate: 1 },
+          },
+      ]);
+      console.log(dayWiseBookings,"dayWiseBookings---------------------------------------");
+
+      // const filterData = dayWiseBookings.filter((item) => {
+      //     return item._id.turf == turf
+      // }).map((item) => {
+      //     const date = new Date(item._id.bookDate);
+      //     const day = date.getDate().toString().padStart(2, '0');
+      //     const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      //     const year = date.getFullYear().toString();
+
+      //     return {
+      //         date: `${day}-${month}-${year}`,
+      //         count: item.count
+      //     };
+      // });
+
+      // const filterData = dayWiseBookings.filter((item) => item._id && item._id.turf.equals(turf))
+      // .map((item) => {
+      //     const date = new Date(item._id.bookDate);
+      //     const day = date.getDate().toString().padStart(2, '0');
+      //     const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      //     const year = date.getFullYear().toString();
+  
+      //     return {
+      //         date: `${day}-${month}-${year}`,
+      //         count: item.count,
+      //     };
+      // });
+  
+      const filterData = dayWiseBookings.filter((item) => {
+        return item._id.partner == partner
+    }).map((item) => {
+        const date = new Date(item._id.bookDate);
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear().toString();
+
+        return {
+            date: `${day}-${month}-${year}`,
+            count: item.count
+        };
+    });
+
+      console.log(filterData,'------filterData--------------------------------------------')
+          
+      res.status(200).json({ dayWiseBookings: filterData, userCount: userCount.length,bookingCount,TotalRevenue })
+  } catch (error) {
+      res.status(500).json(error.response.data)
+  }
+}
+
+
+
+
+
 module.exports = { partnerSignup,otpPartnerSubmit, partnerLogin,otpResendPartner,
   ManagerTurfView,partnerProfile,updateProfile,profilePhotoUpload,
-  TurfDetailView
+  TurfDetailView,totalCount
 }

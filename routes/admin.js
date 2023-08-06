@@ -2,7 +2,7 @@ const express = require('express');
 const AdminRouter = express.Router();
 const adminController= require('../controller/adminController')
 
-const auth= require('../middleware/adminJWT')
+const adminJWT= require('../middleware/adminJWT')
 
 AdminRouter.post('/adminLogin',adminController.adminLogin)
 
@@ -20,7 +20,9 @@ AdminRouter.get('/turfs',adminController.TurfList)
 AdminRouter.post('/approveTurfs',adminController.approveTurfs)
 
 AdminRouter.get('/bookingList',adminController.bookingLists)
+AdminRouter.get('/allCounts',adminController.TotalCounts)
 
+AdminRouter.get('/salesReport',adminController.salesReport)
 
 
 

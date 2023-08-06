@@ -2,7 +2,7 @@ const adminCollection = require("../model/adminModel");
 const userCollection = require("../model/userModel");
 const partnerCollection = require("../model/partnerModel");
 const turfCollection = require("../model/turfModel");
-const bookingCollection= require ('../model/bookingModel')
+const bookingCollection = require("../model/bookingModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
@@ -32,15 +32,17 @@ const adminLogin = async (req, res) => {
     if (admin) {
       if (admin.password === password) {
         console.log("Logged in successfully");
-        const token = jwt.sign({ sub: admin._id }, process.env.ADMIN_TOKEN_SECRET, { expiresIn: "3d" });
+        const token = jwt.sign(
+          { sub: admin._id },
+          process.env.ADMIN_TOKEN_SECRET,
+          { expiresIn: "3d" }
+        );
         res.json({ admin: true, token });
       } else {
-        console.log("Invalid Password");
         const errors = { username: "Invalid password" };
         res.json({ errors, admin: false });
       }
     } else {
-      console.log("Username not found");
       const errors = { username: "Username not found" };
       res.json({ errors, admin: false });
     }
@@ -50,9 +52,7 @@ const adminLogin = async (req, res) => {
 };
 
 const userList = async (req, res) => {
-  console.log("hello iam user data .......-------");
   const data = await userCollection.find({});
-  console.log(data, "user data  ahsddgd");
   if (data) {
     res.json({ data });
   } else {
@@ -63,7 +63,6 @@ const userList = async (req, res) => {
 const partnerList = async (req, res) => {
   console.log("hello iam user data .......-------");
   const data = await partnerCollection.find({});
-  console.log(data, "user data  ahsddgd");
   if (data) {
     res.json({ data });
   } else {
@@ -72,13 +71,11 @@ const partnerList = async (req, res) => {
 };
 
 // ///BLOCKING USER BY ADMIN
-
 const blockUser = async (req, res) => {
   try {
     console.log("hello ia block user -----------ddfdfdd");
     const { userId } = req.body;
     const userData = await userCollection.findOne({ _id: userId });
-    console.log(userData, "hello ia block user -----------ddfdfdd");
     if (userData) {
       const data = await userCollection.updateOne(
         { _id: userData._id },
@@ -103,7 +100,6 @@ const UnBlockUser = async (req, res) => {
     console.log("hello ia unblock user -----------ddfdfdd");
     const { userId } = req.body;
     const userData = await userCollection.findOne({ _id: userId });
-    console.log(userData, "hello ia unblock user -----------ddfdfdd");
     if (userData) {
       const data = await userCollection.updateOne(
         { _id: userData._id },
@@ -123,8 +119,7 @@ const UnBlockUser = async (req, res) => {
   }
 };
 
-
-//APPROVE PARTNER BY ADMIN 
+//APPROVE PARTNER BY ADMIN
 const approvePartner = async (req, res) => {
   try {
     console.log("hello im approvePartner -----------ddfdfdd");
@@ -150,14 +145,12 @@ const approvePartner = async (req, res) => {
   }
 };
 
-
 //<<<<<<<<<<<<<<<-----Block partner by admin ------->>>>>>>>>>>>>>>>>>
 const blockManager = async (req, res) => {
   try {
     console.log("hello ia block user -----------ddfdfdd");
     const { userId } = req.body;
     const userData = await partnerCollection.findOne({ _id: userId });
-    console.log(userData, "hello ia block user -----------ddfdfdd");
     if (userData) {
       const data = await partnerCollection.updateOne(
         { _id: userData._id },
@@ -176,7 +169,6 @@ const blockManager = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 //<<<<<<<<<<<<<<<-----  UnBlock partner by admin ------->>>>>>>>>>>>>>>>>>
 const UnBlockManager = async (req, res) => {
@@ -204,11 +196,9 @@ const UnBlockManager = async (req, res) => {
   }
 };
 
-
 const TurfList = async (req, res) => {
   // const {userId} = req.body
   const data = await turfCollection.find({});
-  console.log(data, "turf data  ahsddgd");
   if (data) {
     res.json({ data });
   } else {
@@ -242,12 +232,87 @@ const approveTurfs = async (req, res) => {
   }
 };
 
+const bookingLists = async (req, res) => {
+  const response = await bookingCollection
+    .find({})
+    .populate("turf")
+    .populate("user")
+    .sort({ createdAt: -1 });
+  res.status(200).json({ response });
+};
 
-const bookingLists = async(req,res)=>{
-  const response= await bookingCollection.find({}).populate('turf').populate('user')
-  res.status(200).json({response})
-}
 
+const salesReport = async (req, res) => {
+  const response = await bookingCollection
+    .find({})
+    .populate("turf")
+    .populate("user")
+  res.status(200).json({ response });
+};
+
+
+
+
+
+const TotalCounts = async (req, res) => {
+  try {
+    const UserCounts = await userCollection.find().count();
+    const PartnerCounts = await partnerCollection.find().count();
+    const BookingCount = await bookingCollection.find().count();
+
+    // const query = { cancelBooking: false };
+    // const projection = { _id: 0, price: 1 };
+    // const totalRevenue = await bookingCollection.find(query, projection)
+    // console.log(totalRevenue,'--------------------------------------');
+    // const TotalPrice = totalRevenue.reduce((accumulator, item) => accumulator + item.price, 0);
+
+    const query = { cancelBooking: false };
+    const projection = { _id: 0, price: 1, createdAt: 1 };
+    const bookings = await bookingCollection.find(query, projection);
+    const TotalRevenue = bookings.reduce(
+      (accumulator, item) => accumulator + item.price,
+      0
+    );
+
+    // Group bookings by month
+    const monthlyRevenue = bookings.reduce((acc, booking) => {
+      const bookingDate = new Date(booking.bookDate);
+      const yearMonth =
+        bookingDate.getFullYear() + "-" + (bookingDate.getMonth() + 1);
+      if (!acc[yearMonth]) {
+        acc[yearMonth] = 0;
+      }
+      acc[yearMonth] += booking.price;
+      return acc;
+    }, {});
+    console.log(
+      monthlyRevenue,
+      "----------------------------------------------"
+    );
+
+    // Group bookings by day
+    const dailyRevenue = bookings.reduce((acc, booking) => {
+      const bookingDate = new Date(booking.createdAt);
+      const yearMonthDay = bookingDate.toISOString().slice(0, 10);
+      if (!acc[yearMonthDay]) {
+        acc[yearMonthDay] = 0;
+      }
+      acc[yearMonthDay] += booking.price;
+      return acc;
+    }, {});
+    console.log(dailyRevenue, "dailyRevenue------------------------------");
+
+    res.status(200).json({
+      UserCounts: UserCounts,
+      PartnerCounts: PartnerCounts,
+      BookingCount: BookingCount,
+      TotalRevenue: TotalRevenue,
+      dailyRevenue: dailyRevenue,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 module.exports = {
   adminLogin,
@@ -260,5 +325,7 @@ module.exports = {
   UnBlockManager,
   TurfList,
   approveTurfs,
-  bookingLists
+  bookingLists,
+  TotalCounts,
+  salesReport
 };

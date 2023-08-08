@@ -3,9 +3,9 @@ const express = require('express');
 const path = require('path');
 // const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-const mongoose = require('./config/database'); 
 let cors= require('cors')
 const bodyParser = require('body-parser');
+require('./config/database'); 
 require('dotenv').config() 
 
 

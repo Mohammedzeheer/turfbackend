@@ -1,6 +1,7 @@
 const userCollection = require('../model/userModel')
 const turfCollection= require('../model/turfModel')
 const bookingCollection = require('../model/bookingModel')
+const chatCollection=require('../model/chatModel')
 const bcrypt= require('bcrypt')
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer')
@@ -11,7 +12,6 @@ var mongoose = require('mongoose');
 const { Types } = require('mongoose');
 
 
-// let upload= require('../middleware/photo')
 
 const userHome = (req,res)=>{
     res.send('user home ')
@@ -26,6 +26,11 @@ const userData = async (req,res)=>{
   return res.json({data});
 }
 
+const getUsers = async (req,res)=>{
+  const data = await userCollection.find()
+  console.log(data , "iam user datas")
+  return res.json({data});
+}
 
 const checkUserBlock = async (req, res, next) => {
   try {
@@ -219,13 +224,15 @@ const resendOtp = async function (req, res, next) {
 const photoUpload=async(req,res,next)=>{
   try{
     console.log("hello iam photo upload")
-      const userId=req.UserId
-
+      // const userId=req.UserId
+      const {userId}=req.body
+      console.log(userId,"hello iam photo upload")
       const result = await cloudinary.uploader.upload(req.file.path);
       
       console.log(result," result of photo")    
-      await userCollection.updateOne({_id:userId},{$set:{image:result.secure_url}}).then(()=>{
-          res.json({status:true,imageurl:result.secure_url})
+      const data=await userCollection.updateOne({_id:userId},{$set:{image:result.secure_url}}).then(()=>{
+        console.log(data)
+      res.json({status:true,data})
       })
   }catch(err){
       console.log(err);
@@ -251,7 +258,7 @@ const userProfile=async (req,res,next)=>{
 const AllturfView = async (req, res) => {
   try {
     console.log("hello, I am all turfs")
-    const data = await turfCollection.find({ isApprove: true }) // Filter data where isApprove is true
+    const data = await turfCollection.find({ isApprove: true })
     if (data && data.length > 0) {
       res.json({ data });
     } else {
@@ -279,8 +286,8 @@ const AllturfView = async (req, res) => {
 
 const reviewSubmit = async (req, res) => {
   try {
-      const { turfId, review, rating,userId } = req.body;
-      console.log(req.body,'-------------------------------reviewSubmit')
+      const userId=req.UserId
+      const { turfId, review, rating } = req.body;     
       const turf = await turfCollection.findById({ _id: turfId });
       turf.reviews.push({userId,review,rating});
 
@@ -332,11 +339,81 @@ const getReviews = async (req, res) => {
 }
 
 
+// 
+
+
+
+const getMessages = async (req, res) => {
+  try {
+    const userId = req.UserId; // Assuming you have the user ID from the request
+    const messages = await chatCollection.find({ userId }).sort({ createdAt: -1 });
+    res.json(messages);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+const AddMessages = async (req, res) => {
+  try {
+    const { sender, content } = req.body;
+    const userId = req.UserId; 
+
+    const newMessage = new chatCollection({ userId, sender, content });
+    await newMessage.save();
+    res.status(201).json(newMessage);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+module.exports = {
+  AddMessages
+};
+
+// const getMessages = async (req, res) => {
+  //   try {
+  //     const userId=req.UserId
+  //     const messages = await chatCollection.findById(userId);
+  //     res.json(messages);
+  //   } catch (error) {
+  //     res.status(500).json({ error: 'Server error' });
+  //   }
+  // };
+
+// const AddMessages = async (req, res) => {
+//   try {
+//     const { sender, content } = req.body;
+//     const userId = req.UserId; // Assuming you have the user ID from the request
+
+//     // Check if the user exists
+//     const user = await userCollection.findById(userId);
+
+//     if (user) {
+//       const newMessage = new chatCollection({ sender, content });
+//       await newMessage.save();
+//       user.messages.push(newMessage);
+//       await user.save();
+//       res.status(201).json(newMessage);
+//     } else {
+//       // If the user does not exist, create a new user with the message
+//       const newUser = new userCollection({ _id: userId, messages: [] });
+//       const newMessage = new chatCollection({ sender, content });
+//       await newMessage.save();
+//       newUser.messages.push(newMessage);
+//       await newUser.save();
+//       res.status(201).json(newMessage);
+//     }
+//   } catch (error) {
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// };
+
 
 
 module.exports = {userSignup,userLogin,userHome,userProfile, 
   AllturfView, TurfSingleView,
-  otpSubmit,resendOtp , userData,photoUpload,bookingSlot,reviewSubmit,getReviews,checkUserBlock
+  otpSubmit,resendOtp , userData,photoUpload,bookingSlot,reviewSubmit,getReviews,checkUserBlock,
+  getMessages,AddMessages
 }
 
 

@@ -1,25 +1,23 @@
-const JWT = require('jsonwebtoken');
-const dotenv =require("dotenv").config()
+const jwt = require('jsonwebtoken')
+require('dotenv').config()
 
-const authJWT = (req, res, next) => {
-  const { token } = req.body;
-
+const jwtAdmin= (req, res, next) => {
+  const jwttoken = req.headers.authorization;
+  console.log(jwttoken, "---------------- JWT TOKEN ADMIN ---------------");
+  let token = jwttoken.replace(/"/g, ''); 
   if (token) {
     try {
-      const decode = JWT.verify(token, process.env.ADMIN_TOKEN_SECRET); 
-      console.log(decode);
-      if (decode.exp > Date.now() / 1000) {
-        console.log("success");
-        next();
-      } else {
-        res.json({ status: 'failed', message: 'Token has expired.' });
-      }
+      console.log(jwttoken, "---------------- JWT TOKEN ADMIN ---------------");
+      const admin = jwt.verify(token, process.env.ADMIN_TOKEN_SECRET);
+      console.log(admin, "---------------- JWT ADMIN -------------------");
+      req.adminId=admin.id 
+      next();
     } catch (err) {
-      res.json({ status: 'failed', message: 'Invalid token.' });
+      res.status(401).json({ message: 'Invalid token' });
     }
   } else {
-    res.json({ status: 'failed', message: 'Token not provided.' });
+    res.status(401).json({ message: 'Token missing' });
   }
 };
 
-module.exports = authJWT;
+module.exports=jwtAdmin;

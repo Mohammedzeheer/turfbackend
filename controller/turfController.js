@@ -63,7 +63,7 @@ const AddTurf = async (req, res) => {
     // Parse the JSON strings into JavaScript objects
     const venueTypes = JSON.parse(req.body.venueTypes);
     const prices = JSON.parse(req.body.prices);
-
+    const partnerId= req.partnerId
     const {
       courtName,
       mobileNumber,
@@ -71,7 +71,6 @@ const AddTurf = async (req, res) => {
       district,
       description,
       location,
-      partnerId,
       openingTime,
       closingTime,
     } = req.body;

@@ -179,31 +179,37 @@ const otpResendPartner = async function (req, res, next) {
 }
 
 
-const partnerProfile = async (req,res)=>{
-  const ID = req.params.id;
-  console.log(ID)
+const partnerProfileold = async (req,res)=>{
+  const ID = req.partnerId
   const data = await partnerCollection.findById({_id:ID})
-  console.log(data , "iam partner datas")
   return res.json({data});
 }
 
+const partnerProfile = async (req, res) => {
+  try {
+    const partnerId = req.partnerId; 
+    const partnerData = await partnerCollection.findById({ _id: partnerId });
+
+    if (!partnerData) {
+      return res.status(404).json({ error: 'Partner not found' });
+    }
+
+    return res.status(200).json({ data: partnerData });
+  } catch (error) {
+    console.error('An error occurred while fetching partner profile:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
 
 
-const updateProfile1 = async (req,res)=>{
-  const ID = req.params.id;
-  console.log(ID)
-  const data = await partnerCollection.findById({_id:ID})
-  console.log(data , "iam partner datas")
-  return res.json({data});
-}
 
 
 const updateProfile=async (req,res,next)=>{
   try{
     console.log("hello iam partnerprofile update")
-      console.log(req.body,"formadata")
+    const partnerId=req.partnerId; 
 
-      let {username,phonenumber,address,partnerId} = req.body.formData
+      let {username,phonenumber,address} = req.body.formData
      const data=await partnerCollection.findByIdAndUpdate({_id:partnerId},{$set:{address:address,phonenumber:phonenumber,username:username}})
      console.log(data)
           res.json({status:true,data})
@@ -214,14 +220,13 @@ const updateProfile=async (req,res,next)=>{
 
 
 //<<<<<<<<<<<<<<  PRofile upload of partner >>>>>>>>>>
-const profilePhotoUpload=async(req,res,next)=>{
+const profilePhotoUpload1=async(req,res,next)=>{
   try{
     console.log("hello iam partner photo upload")
     console.log(req.body)
-      const {partnerId}=req.body
+     const partnerId= req.partnerId; 
+     console.log(partnerId)
       const result = await cloudinary.uploader.upload(req.file.path);
-      // const imgUrl=req.file.filename
-      // console.log(imgUrl)
       await partnerCollection.updateOne({_id:partnerId},{$set:{image:result.secure_url}}).then(()=>{
           res.json({status:true,imageurl:result.secure_url})
       })
@@ -230,13 +235,35 @@ const profilePhotoUpload=async(req,res,next)=>{
   }
 }
 
+const profilePhotoUpload = async (req, res, next) => {
+  try {
+    console.log("Hello, I am handling partner photo upload");
+    console.log(req.body);
+
+    const partnerId = req.partnerId;
+    console.log(partnerId);
+
+    const result = await cloudinary.uploader.upload(req.file.path);
+
+    await partnerCollection.updateOne(
+      { _id: partnerId },
+      { $set: { image: result.secure_url } }
+    );
+
+    res.status(200).json({ status: true, imageurl: result.secure_url });
+  } catch (error) {
+    console.error("Error in partner photo upload:", error);
+    res.status(500).json({ status: false, message: "Error uploading photo" });
+  }
+};
+
 
 
 //<<<<<<<<<<<<<<  MANAGER TURF VIEW >>>>>>>>>>
 const ManagerTurfView = async (req, res) => {
   try {
     console.log("hello iam all turfs");
-    const partnerID = req.params.id;
+    const partnerID = req.partnerId
     console.log(partnerID)
     if (partnerID) {
       const turf = await turfCollection.find({ partnerId: partnerID });
@@ -274,6 +301,7 @@ const TurfDetailView = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 
  const totalCount = async (req, res) => {

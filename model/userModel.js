@@ -8,7 +8,9 @@ const userSchema = new mongoose.Schema({
       isBlock:{type:Boolean,default:false},
       image:{type:String},
       wallet:{type:Number,default:0},
-      address:{type:String}
+      address:{type:String},
+      messages: [{ type: mongoose.Types.ObjectId, ref: 'messages' }],
+
 })
 
 module.exports = mongoose.model ('users', userSchema)

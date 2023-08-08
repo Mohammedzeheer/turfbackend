@@ -6,6 +6,8 @@ const bookingCollection = require("../model/bookingModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
+
+///<<<<<<<<<<<<<<<<<<<<<<<< ADMIN SIGNUP >>>>>>>>>>>>>>>>>>>>>>>>>>>
 // let data = {
 //     username: "mohammed",
 //     password: "123456"
@@ -33,7 +35,7 @@ const adminLogin = async (req, res) => {
       if (admin.password === password) {
         console.log("Logged in successfully");
         const token = jwt.sign(
-          { sub: admin._id },
+          { id: admin._id },
           process.env.ADMIN_TOKEN_SECRET,
           { expiresIn: "3d" }
         );
@@ -51,6 +53,8 @@ const adminLogin = async (req, res) => {
   }
 };
 
+
+///<<<<<<<<<<<<<<<<<<<<<<<< ADMIN GET ALL USER LIST >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const userList = async (req, res) => {
   const data = await userCollection.find({});
   if (data) {
@@ -60,8 +64,9 @@ const userList = async (req, res) => {
   }
 };
 
+
+///<<<<<<<<<<<<<<<<<<<<<<<< ADMIN ACCESS ALL PARTNER DATA  >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const partnerList = async (req, res) => {
-  console.log("hello iam user data .......-------");
   const data = await partnerCollection.find({});
   if (data) {
     res.json({ data });
@@ -70,11 +75,12 @@ const partnerList = async (req, res) => {
   }
 };
 
-// ///BLOCKING USER BY ADMIN
+
+
+///<<<<<<<<<<<<<<<<<<<<<<<< ADMIN  BLOCK USERS >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const blockUser = async (req, res) => {
   try {
-    console.log("hello ia block user -----------ddfdfdd");
-    const { userId } = req.body;
+    const {userId } = req.body;
     const userData = await userCollection.findOne({ _id: userId });
     if (userData) {
       const data = await userCollection.updateOne(
@@ -95,9 +101,10 @@ const blockUser = async (req, res) => {
   }
 };
 
+
+///<<<<<<<<<<<<<<<<<<<<<<<< ADMIN UNBLOCK USERS  >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const UnBlockUser = async (req, res) => {
   try {
-    console.log("hello ia unblock user -----------ddfdfdd");
     const { userId } = req.body;
     const userData = await userCollection.findOne({ _id: userId });
     if (userData) {
@@ -106,7 +113,7 @@ const UnBlockUser = async (req, res) => {
         { $set: { isBlock: false } }
       );
       if (data.modifiedCount > 0) {
-        return res.json({ data, message: "User blocked successfully" });
+        return res.json({ data, message: "User Unblocked successfully" });
       } else {
         return res.status(404).json({ message: "User not found" });
       }
@@ -119,13 +126,12 @@ const UnBlockUser = async (req, res) => {
   }
 };
 
-//APPROVE PARTNER BY ADMIN
+
+///<<<<<<<<<<<<<<<<<<<<<<<< ADMIN APPROVE A PARTNER  >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const approvePartner = async (req, res) => {
   try {
-    console.log("hello im approvePartner -----------ddfdfdd");
     const { userId } = req.body;
     const userData = await partnerCollection.findOne({ _id: userId });
-    console.log(userData, "approve");
     if (userData) {
       const data = await partnerCollection.updateOne(
         { _id: userData._id },
@@ -145,10 +151,10 @@ const approvePartner = async (req, res) => {
   }
 };
 
-//<<<<<<<<<<<<<<<-----Block partner by admin ------->>>>>>>>>>>>>>>>>>
+
+//<<<<<<<<<<<<<<<-----ADMIN BLOCK A PARTNER  ------->>>>>>>>>>>>>>>>>>
 const blockManager = async (req, res) => {
   try {
-    console.log("hello ia block user -----------ddfdfdd");
     const { userId } = req.body;
     const userData = await partnerCollection.findOne({ _id: userId });
     if (userData) {
@@ -170,10 +176,10 @@ const blockManager = async (req, res) => {
   }
 };
 
-//<<<<<<<<<<<<<<<-----  UnBlock partner by admin ------->>>>>>>>>>>>>>>>>>
+
+//<<<<<<<<<<<<<<<-----  ADMIN UNBLOCK A PARTNER------->>>>>>>>>>>>>>>>>>
 const UnBlockManager = async (req, res) => {
   try {
-    console.log("hello ia unblock user -----------ddfdfdd");
     const { userId } = req.body;
     const userData = await partnerCollection.findOne({ _id: userId });
     console.log(userData, "hello ia unblock user -----------ddfdfdd");
@@ -196,8 +202,9 @@ const UnBlockManager = async (req, res) => {
   }
 };
 
+
+///<<<<<<<<<<<<<<<<<<<<<<<< ADMIN ACCESS ALL TURF DATA  >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const TurfList = async (req, res) => {
-  // const {userId} = req.body
   const data = await turfCollection.find({});
   if (data) {
     res.json({ data });
@@ -206,10 +213,11 @@ const TurfList = async (req, res) => {
   }
 };
 
-//APPROVE TURFS BY ADMIN
+
+
+///<<<<<<<<<<<<<<<<<<<<<<<< ADMIN APPROVE TURFS >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const approveTurfs = async (req, res) => {
   try {
-    console.log("hello im approveturfs-----------ddfdfdd");
     const { userId } = req.body;
     const userData = await turfCollection.findOne({ _id: userId });
     console.log(userData, "approve");
@@ -232,6 +240,8 @@ const approveTurfs = async (req, res) => {
   }
 };
 
+
+///<<<<<<<<<<<<<<<<<<<<<<<< ADMIN GET ALL BOOKING DATA >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const bookingLists = async (req, res) => {
   const response = await bookingCollection
     .find({})
@@ -242,6 +252,7 @@ const bookingLists = async (req, res) => {
 };
 
 
+///<<<<<<<<<<<<<<<<<<<<<<<< ADMIN GET SALES REPORT  >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const salesReport = async (req, res) => {
   const response = await bookingCollection
     .find({})
@@ -253,18 +264,13 @@ const salesReport = async (req, res) => {
 
 
 
-
+///<<<<<<<<<<<<<<<<<<<<<<<< ADMIN GET DASHBOARD DATA  >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const TotalCounts = async (req, res) => {
   try {
     const UserCounts = await userCollection.find().count();
     const PartnerCounts = await partnerCollection.find().count();
     const BookingCount = await bookingCollection.find().count();
 
-    // const query = { cancelBooking: false };
-    // const projection = { _id: 0, price: 1 };
-    // const totalRevenue = await bookingCollection.find(query, projection)
-    // console.log(totalRevenue,'--------------------------------------');
-    // const TotalPrice = totalRevenue.reduce((accumulator, item) => accumulator + item.price, 0);
 
     const query = { cancelBooking: false };
     const projection = { _id: 0, price: 1, createdAt: 1 };

@@ -11,6 +11,7 @@ userRouter.post('/signup', userController.userSignup)
 userRouter.post('/otpcheck', userController.otpSubmit)
 userRouter.post('/resendotp', userController.resendOtp)
 userRouter.get('/userdata',jwtUser, userController.userData)
+
 // userRouter.get('/checkUserBlock', userController.checkUserBlock)
 
 userRouter.post('/userlogin',checkUserBlock,userController.userLogin)
@@ -20,7 +21,7 @@ userRouter.post('/photoupload',upload.single("image"),userController.photoUpload
 userRouter.get('/allturfs',userController.AllturfView)
 userRouter.get('/viewTurf/:id',userController.TurfSingleView)
 
-userRouter.post('/reviews',userController.reviewSubmit)
+userRouter.post('/reviews',jwtUser,userController.reviewSubmit)
 userRouter.get('/getReviews/:id',userController.getReviews)
 
 
@@ -34,6 +35,8 @@ userRouter.get('/bookings_user',jwtUser, bookingController.BookingHistoryUser);
 
 userRouter.post("/cancelbooking/:id", bookingController.CancelBooking);
 
+userRouter.get('/getMessages',jwtUser,userController.getMessages)
+userRouter.post('/addMessages',jwtUser,userController.AddMessages)
 
 
 // paymentProcess,bookTurf,bookingSuccess,bookingSlot

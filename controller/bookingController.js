@@ -181,8 +181,9 @@ const BookingHistoryUser = async (req, res) => {
   }
 };
 
-const BookingsHistoryPartner = async (req, res) => {
-  const partnerId = req.params.id;
+const BookingsHistoryPartner1 = async (req, res) => {
+  const partnerId = req.partnerId;
+  console.log(partnerId,'--------------------------------------partnerId')
   try {
     const data = await bookingCollection
       .find({ partner: partnerId })
@@ -194,6 +195,23 @@ const BookingsHistoryPartner = async (req, res) => {
     console.log(error);
   }
 };
+
+
+const BookingsHistoryPartner = async (req, res) => {
+  const partnerId = req.partnerId;
+  try {
+    const data = await bookingCollection
+      .find({ partner: partnerId })
+      .populate("user")
+      .populate("turf")
+      .sort({ createdAt: -1 });
+    res.status(200).json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'An error occurred while fetching booking history.' });
+  }
+};
+
 
 const CancelBooking = async (req, res) => {
   try {

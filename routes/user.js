@@ -3,7 +3,7 @@ const userRouter = express.Router();
 const userController= require('../controller/userController')
 const bookingController = require('../controller/bookingController')
 const jwtUser=require('../middleware/userJWT')
-const upload= require('../middleware/photo')
+const upload= require('../middleware/image')
 const checkUserBlock= require('../middleware/userBlock')
 
 userRouter.get('/',userController.userHome)
@@ -16,7 +16,7 @@ userRouter.get('/userdata',jwtUser, userController.userData)
 
 userRouter.post('/userlogin',checkUserBlock,userController.userLogin)
 userRouter.post('/userprofile',jwtUser,userController.userProfile)
-userRouter.post('/photoupload',upload.single("image"),userController.photoUpload)
+userRouter.post('/photoupload',upload.single("image"),jwtUser,userController.photoUpload)
 
 userRouter.get('/allturfs',userController.AllturfView)
 userRouter.get('/viewTurf/:id',userController.TurfSingleView)
@@ -33,7 +33,7 @@ userRouter.post("/booking-failed/:id", bookingController.bookingFailed);
 
 userRouter.get('/bookings_user',jwtUser, bookingController.BookingHistoryUser);
 
-userRouter.post("/cancelbooking/:id", bookingController.CancelBooking);
+userRouter.post("/cancelbooking/:id",jwtUser, bookingController.CancelBooking);
 
 userRouter.get('/getMessages',jwtUser,userController.getMessages)
 userRouter.post('/addMessages',jwtUser,userController.AddMessages)

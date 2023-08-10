@@ -2,7 +2,6 @@ const partnerCollection = require('../model/partnerModel')
 const turfCollection = require('../model/turfModel')
 const bookingCollection=require('../model/bookingModel')
 const mongoose = require('mongoose');
-
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const nodemailer = require('nodemailer')
@@ -14,9 +13,7 @@ const dotenv =require('dotenv').config()
 //<<<<<<<<<<<<<<<<<<<<<<----Partner lOGIN FUNCTION here ---->>>>>>>>>>>>>>>>>>>>>
 const partnerLogin = async (req, res) => {
   try {
-    console.log("hello iam userlogin");
     const { email, password } = req.body;
-    console.log(email, "hello iam userlogin");
     const partner = await partnerCollection.findOne({ email: email });
 
     if (email === undefined) {
@@ -31,10 +28,8 @@ const partnerLogin = async (req, res) => {
         res.json({ errors, created: false });
       } else {
         let auth = password ? await bcrypt.compare(password, partner.password) : null;
-        console.log(auth);
         if (auth) {
           const token = jwt.sign({ partnerId: partner._id }, process.env.PARTNER_TOKEN_SECRET, { expiresIn: "3d" });
-          console.log(token);
           res.json({ login: true, token, partner });
         } else {
           const errors = { password: "incorrect password" };
@@ -42,7 +37,6 @@ const partnerLogin = async (req, res) => {
         }
       }
     } else {
-      console.log("error");
       const errors = { email: "incorrect email" };
       res.json({ errors, created: false });
     }
@@ -57,7 +51,6 @@ const partnerLogin = async (req, res) => {
 let partnerdata 
 const partnerSignup = async (req, res) => {
   try {
-    console.log("iam in partnersignup dkgsadsadsadsasdhs")
     let { email, phonenumber, turfname, username, password } = req.body;
     const checkusername = await partnerCollection.find({ email: email });
 
@@ -196,7 +189,6 @@ const partnerProfile = async (req, res) => {
 
     return res.status(200).json({ data: partnerData });
   } catch (error) {
-    console.error('An error occurred while fetching partner profile:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
@@ -204,9 +196,8 @@ const partnerProfile = async (req, res) => {
 
 
 
-const updateProfile=async (req,res,next)=>{
+const updateProfile1=async (req,res,next)=>{
   try{
-    console.log("hello iam partnerprofile update")
     const partnerId=req.partnerId; 
 
       let {username,phonenumber,address} = req.body.formData
@@ -218,28 +209,33 @@ const updateProfile=async (req,res,next)=>{
   }
 }
 
-
-//<<<<<<<<<<<<<<  PRofile upload of partner >>>>>>>>>>
-const profilePhotoUpload1=async(req,res,next)=>{
-  try{
-    console.log("hello iam partner photo upload")
-    console.log(req.body)
-     const partnerId= req.partnerId; 
-     console.log(partnerId)
-      const result = await cloudinary.uploader.upload(req.file.path);
-      await partnerCollection.updateOne({_id:partnerId},{$set:{image:result.secure_url}}).then(()=>{
-          res.json({status:true,imageurl:result.secure_url})
-      })
-  }catch(err){
-      console.log(err);
+const updateProfile = async (req, res, next) => {
+  try {
+    const partnerId = req.partnerId;
+    const { username, phonenumber, address } = req.body.formData;
+    if (!username || !phonenumber || !address) {
+      return res.status(400).json({ status: false, message: 'Missing required fields' });
+    }
+    const updatedData = await partnerCollection.findByIdAndUpdate(
+      { _id: partnerId },
+      { $set: { address, phonenumber, username } },
+      { new: true }
+    );
+    if (!updatedData) {
+      return res.status(404).json({ status: false, message: 'Partner not found' });
+    }
+    res.json({ status: true, data: updatedData });
+  } catch (err) {
+    res.status(500).json({ status: false, message: 'An error occurred' });
   }
-}
+};
 
+
+
+
+//<<<<<<<<<<<<<<  Poofile upload of partner >>>>>>>>>
 const profilePhotoUpload = async (req, res, next) => {
   try {
-    console.log("Hello, I am handling partner photo upload");
-    console.log(req.body);
-
     const partnerId = req.partnerId;
     console.log(partnerId);
 
@@ -252,7 +248,6 @@ const profilePhotoUpload = async (req, res, next) => {
 
     res.status(200).json({ status: true, imageurl: result.secure_url });
   } catch (error) {
-    console.error("Error in partner photo upload:", error);
     res.status(500).json({ status: false, message: "Error uploading photo" });
   }
 };

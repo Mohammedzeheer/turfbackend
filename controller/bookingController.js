@@ -216,7 +216,9 @@ const BookingsHistoryPartner = async (req, res) => {
 const CancelBooking = async (req, res) => {
   try {
     const bookingId = req.params.id;
-    const { reason, userId } = req.body;
+      const userId  = req.UserId
+      console.log( 'hello iam cancel------------------------------', userId);
+    const { reason} = req.body;
     const data = await bookingCollection.updateOne(
       { _id: bookingId },
       { $set: { cancelBooking: true, cancelReason: reason } }

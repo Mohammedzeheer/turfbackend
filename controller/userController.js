@@ -218,41 +218,36 @@ const resendOtp = async function (req, res, next) {
 
 
 ////----------------------------------upto here  ----------------------------------------------------------
+const photoUpload = async (req, res, next) => {
+  try {
+     const userId = req.UserId; 
+     console.log(userId);
+    const result = await cloudinary.uploader.upload(req.file.path);
 
-
-
-const photoUpload=async(req,res,next)=>{
-  try{
-    console.log("hello iam photo upload")
-      // const userId=req.UserId
-      const {userId}=req.body
-      console.log(userId,"hello iam photo upload")
-      const result = await cloudinary.uploader.upload(req.file.path);
-      
-      console.log(result," result of photo")    
-      const data=await userCollection.updateOne({_id:userId},{$set:{image:result.secure_url}}).then(()=>{
-        console.log(data)
-      res.json({status:true,data})
-      })
-  }catch(err){
-      console.log(err);
+    await userCollection.updateOne( { _id: userId }, { $set: { image: result.secure_url } });
+    res.status(200).json({ status: true, imageurl: result.secure_url });
+  } catch (error) {
+    console.error("Error in partner photo upload:", error);
+    res.status(500).json({ status: false, message: "Error uploading photo" });
   }
-}
+};
 
-const userProfile=async (req,res,next)=>{
-  try{
-    console.log("hello iam userprofile")
-      const userId=req.UserId
-      console.log(req.body,"formadata")
 
-      let {username,phonenumber,address} = req.body.formData
-     const data=await userCollection.findByIdAndUpdate({_id:userId},{$set:{address:address,username:username}})
-     console.log(data)
-          res.json({status:true,data})
-  }catch(err){
-      console.log(err);
+
+const userProfile = async (req, res, next) => {
+  try {
+    const userId = req.UserId;
+    let { username, address } = req.body;
+    const data = await userCollection.findByIdAndUpdate(
+      { _id: userId },
+      { $set: { address: address, username: username } }
+    );
+    console.log(data);
+    res.json({ status: true, data });
+  } catch (err) {
+    console.log(err);
   }
-}
+};
 
 
 const AllturfView = async (req, res) => {

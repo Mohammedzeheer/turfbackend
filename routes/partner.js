@@ -5,10 +5,10 @@ const turfController=require('../controller/turfController')
 const bookingController = require('../controller/bookingController')
 const upload= require('../middleware/image')
 const jwtPartner= require('../middleware/partnerJWT')
-
+const checkPartnerBlock=require('../middleware/partnerBlock')
 
 partnerRouter.post('/partnersignup',partnerController.partnerSignup)
-partnerRouter.post('/partnerlogin',partnerController.partnerLogin)
+partnerRouter.post('/partnerlogin',checkPartnerBlock,partnerController.partnerLogin)
 partnerRouter.post('/otppartnersubmit', partnerController.otpPartnerSubmit)
 partnerRouter.post('/resendpartnerotp', partnerController.otpResendPartner)
 partnerRouter.get('/partnerprofile',jwtPartner, partnerController.partnerProfile)

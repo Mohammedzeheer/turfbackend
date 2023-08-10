@@ -60,7 +60,6 @@ const AddTurf = async (req, res) => {
     console.log("hello iam addturf");
     console.log(req.body);
 
-    // Parse the JSON strings into JavaScript objects
     const venueTypes = JSON.parse(req.body.venueTypes);
     const prices = JSON.parse(req.body.prices);
     const partnerId= req.partnerId
@@ -77,7 +76,6 @@ const AddTurf = async (req, res) => {
 
     const files = req.files?.map((file) => file.path);
 
-    // Upload multiple photos to Cloudinary asynchronously
     const cloudinaryUploadPromises = files.map((filePath) =>
       cloudinary.uploader.upload(filePath)
     );

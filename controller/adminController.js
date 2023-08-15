@@ -6,76 +6,66 @@ const bookingCollection = require("../model/bookingModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
-
-///<<<<<<<<<<<<<<<<<<<<<<<< ADMIN SIGNUP >>>>>>>>>>>>>>>>>>>>>>>>>>>
-// let data = {
-//     username: "mohammed",
-//     password: "123456"
-//   };
-
-//   const signup = async (req, res) => {
-//     console.log(data);
-
-//     try {
-//       await adminCollection.create(data);
-//       console.log("Added");
-//       res.status(200).send("Added");
-//     } catch (error) {
-//       console.error("Error during signup:", error);
-//       res.status(500).send("Internal Server Error");
-//     }
-//   };
-
 ///<<<<<<<<<<<<<<<<<<<<<<<< ADMIN LOGIN  >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const adminLogin = async (req, res) => {
   try {
     let { username, password } = req.body;
+    if(username == '' || password=='') {
+      return res.status(400).json({message:'Empty Field'});
+    }
+    else if (username === undefined) {
+        return res.status(400).json({message:'User Name required'});
+    } else if (password === undefined) {
+        return res.status(400).json({ message:'Password required'});
+    } 
     let admin = await adminCollection.findOne({ username });
     if (admin) {
       if (admin.password === password) {
-        console.log("Logged in successfully");
         const token = jwt.sign(
           { id: admin._id },
           process.env.ADMIN_TOKEN_SECRET,
           { expiresIn: "3d" }
         );
-        res.json({ admin: true, token });
+        res.status(200).json({token});
       } else {
-        const errors = { username: "Invalid password" };
-        res.json({ errors, admin: false });
+        return res.status(401).json({ message:'Invalid Password'});
       }
     } else {
-      const errors = { username: "Username not found" };
-      res.json({ errors, admin: false });
+      return res.status(404).json({ message:"Admin Not Found"});
     }
   } catch (error) {
-    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
 
 ///<<<<<<<<<<<<<<<<<<<<<<<< ADMIN GET ALL USER LIST >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const userList = async (req, res) => {
-  const data = await userCollection.find({});
-  if (data) {
-    res.json({ data });
-  } else {
-    return res.status(404).json({ message: "Users are  not found" });
+  try {
+    const data = await userCollection.find({});
+    if (data) {
+      res.json({ data });
+    } else {
+      return res.status(404).json({ message: "Users are not found" });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 ///<<<<<<<<<<<<<<<<<<<<<<<< ADMIN ACCESS ALL PARTNER DATA  >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const partnerList = async (req, res) => {
-  const data = await partnerCollection.find({});
+  try {
+     const data = await partnerCollection.find({});
   if (data) {
     res.json({ data });
   } else {
     return res.status(404).json({ message: "Users are  not found" });
   }
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error" });
+  }
 };
-
-
 
 ///<<<<<<<<<<<<<<<<<<<<<<<< ADMIN  BLOCK USERS >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const blockUser = async (req, res) => {
@@ -96,11 +86,9 @@ const blockUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 ///<<<<<<<<<<<<<<<<<<<<<<<< ADMIN UNBLOCK USERS  >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const UnBlockUser = async (req, res) => {
@@ -121,11 +109,9 @@ const UnBlockUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 ///<<<<<<<<<<<<<<<<<<<<<<<< ADMIN APPROVE A PARTNER  >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const approvePartner = async (req, res) => {
@@ -146,11 +132,9 @@ const approvePartner = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 //<<<<<<<<<<<<<<<-----ADMIN BLOCK A PARTNER  ------->>>>>>>>>>>>>>>>>>
 const blockManager = async (req, res) => {
@@ -171,18 +155,15 @@ const blockManager = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 //<<<<<<<<<<<<<<<-----  ADMIN UNBLOCK A PARTNER------->>>>>>>>>>>>>>>>>>
 const UnBlockManager = async (req, res) => {
   try {
     const { userId } = req.body;
     const userData = await partnerCollection.findOne({ _id: userId });
-    console.log(userData, "hello ia unblock user -----------ddfdfdd");
     if (userData) {
       const data = await partnerCollection.updateOne(
         { _id: userData._id },
@@ -197,11 +178,9 @@ const UnBlockManager = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 ///<<<<<<<<<<<<<<<<<<<<<<<< ADMIN ACCESS ALL TURF DATA  >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const TurfList = async (req, res) => {
@@ -213,14 +192,11 @@ const TurfList = async (req, res) => {
   }
 };
 
-
-
 ///<<<<<<<<<<<<<<<<<<<<<<<< ADMIN APPROVE TURFS >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const approveTurfs = async (req, res) => {
   try {
     const { userId } = req.body;
     const userData = await turfCollection.findOne({ _id: userId });
-    console.log(userData, "approve");
     if (userData) {
       const data = await turfCollection.updateOne(
         { _id: userData._id },
@@ -235,11 +211,9 @@ const approveTurfs = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 ///<<<<<<<<<<<<<<<<<<<<<<<< ADMIN GET ALL BOOKING DATA >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const bookingLists = async (req, res) => {
@@ -251,7 +225,6 @@ const bookingLists = async (req, res) => {
   res.status(200).json({ response });
 };
 
-
 ///<<<<<<<<<<<<<<<<<<<<<<<< ADMIN GET SALES REPORT  >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const salesReport = async (req, res) => {
   const response = await bookingCollection
@@ -261,17 +234,12 @@ const salesReport = async (req, res) => {
   res.status(200).json({ response });
 };
 
-
-
-
 ///<<<<<<<<<<<<<<<<<<<<<<<< ADMIN GET DASHBOARD DATA  >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const TotalCounts = async (req, res) => {
   try {
     const UserCounts = await userCollection.find().count();
     const PartnerCounts = await partnerCollection.find().count();
     const BookingCount = await bookingCollection.find().count();
-
-
     const query = { cancelBooking: false };
     const projection = { _id: 0, price: 1, createdAt: 1 };
     const bookings = await bookingCollection.find(query, projection);
@@ -279,7 +247,6 @@ const TotalCounts = async (req, res) => {
       (accumulator, item) => accumulator + item.price,
       0
     );
-
     // Group bookings by month
     const monthlyRevenue = bookings.reduce((acc, booking) => {
       const bookingDate = new Date(booking.bookDate);
@@ -291,11 +258,6 @@ const TotalCounts = async (req, res) => {
       acc[yearMonth] += booking.price;
       return acc;
     }, {});
-    console.log(
-      monthlyRevenue,
-      "----------------------------------------------"
-    );
-
     // Group bookings by day
     const dailyRevenue = bookings.reduce((acc, booking) => {
       const bookingDate = new Date(booking.createdAt);
@@ -306,8 +268,6 @@ const TotalCounts = async (req, res) => {
       acc[yearMonthDay] += booking.price;
       return acc;
     }, {});
-    console.log(dailyRevenue, "dailyRevenue------------------------------");
-
     res.status(200).json({
       UserCounts: UserCounts,
       PartnerCounts: PartnerCounts,
@@ -316,7 +276,7 @@ const TotalCounts = async (req, res) => {
       dailyRevenue: dailyRevenue,
     });
   } catch (error) {
-    console.log(error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 

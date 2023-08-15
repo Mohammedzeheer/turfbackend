@@ -1,10 +1,10 @@
 const userCollection = require("../model/userModel");
 const turfCollection = require("../model/turfModel");
 const bookingCollection = require("../model/bookingModel");
-const paymentStripe = require("../Helpers/Stripe.js");
-const jwt = require("jsonwebtoken");
-const { trusted } = require("mongoose");
+const paymentStripe = require('../helpers/Stripe')
+const sendMail = require('../helpers/email')
 
+///<<<<<<<<<<<<<<<<<<<<<<<< BOOKING SLOT GET  >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const bookingSlot = async (req, res) => {
   const ID = req.params.id;
   let date = req.params.date;
@@ -17,40 +17,11 @@ const bookingSlot = async (req, res) => {
     const booking = await bookingCollection.find({ turf: ID, bookDate });
     return res.status(200).json(booking);
   } catch (error) {
-    console.log(error);
-    res.status(500);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
-//  const bookTurf = async (req, res) => {
-//     try {
-//         let token = req.headers.authorization;
-//         let userId= req.UserId
-//         const { ID, date, time,price,slot} = req.body;
-
-//         const turf = await turfCollection.findById({ _id: ID });
-//         const partnerId = turf.partnerId;
-//         const bookDate = new Date(date);
-//         bookDate.setHours(0);
-//         bookDate.setMinutes(0);
-//         bookDate.setSeconds(0);
-//         bookDate.setMilliseconds(0);
-//         const newBooking = await bookingCollection.create({
-//             user: userId,
-//             turf: ID,
-//             partner:partnerId,
-//             bookDate,
-//             time,
-//             price,
-//             slot
-//         });
-//         res.status(200).json(newBooking);
-//     } catch (error) {
-//         console.log(error);
-//         res.status(500)
-//     }
-// }
-
+///<<<<<<<<<<<<<<<<<<<<<<<< BOOK TURF POST METHOD  >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const bookTurf = async (req, res) => {
   try {
     let userId = req.UserId;
@@ -65,52 +36,47 @@ const bookTurf = async (req, res) => {
 
     if (selectedPaymentMethod == "wallet") {
       const result = await userCollection.findById(userId);
-      console.log(result, "--------------------result");
       const walletPrice = result.wallet;
-      console.log(walletPrice, "--------------------walletPrice");
       if (walletPrice < price) {
         const errors = { wallet: "Insufficient Balance" };
         return res.json({ errors, created: false });
-      }
-      else{
+      } else {
         const newBooking = await bookingCollection.create({
-            user: userId,
-            turf: ID,
-            partner: partnerId,
-            bookDate,
-            time,
-            price,
-            slot,
-            payment:'Success',
-            paymentMethod:selectedPaymentMethod
-          });
-          const newwalletprice=walletPrice-price
-          await userCollection.updateOne({_id:userId},{$set:{wallet:newwalletprice}})   
-          res.status(200).json(newBooking);
+          user: userId,
+          turf: ID,
+          partner: partnerId,
+          bookDate,
+          time,
+          price,
+          slot,
+          paymentMethod: selectedPaymentMethod,
+        });
+        const newwalletprice = walletPrice - price;
+        await userCollection.updateOne(
+          { _id: userId },
+          { $set: { wallet: newwalletprice } }
+        );
+        res.status(200).json(newBooking);
       }
+    } else {
+      const newBooking = await bookingCollection.create({
+        user: userId,
+        turf: ID,
+        partner: partnerId,
+        bookDate,
+        time,
+        price,
+        slot,
+        paymentMethod: selectedPaymentMethod,
+      });
+      res.status(200).json(newBooking);
     }
-else{
-     const newBooking = await bookingCollection.create({
-      user: userId,
-      turf: ID,
-      partner: partnerId,
-      bookDate,
-      time,
-      price,
-      slot,
-      paymentMethod:selectedPaymentMethod
-    });
-    res.status(200).json(newBooking);
-  } 
-}catch (error) {
-    console.log(error);
-    res.status(500);
-  }  
+  } catch (error) {
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
 };
 
-
-
-// let paymentStripe
+///<<<<<<<<<<<<<<<<<<<<<<<< BOOKING PAYMENT PROCESS >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const paymentProcess = async (req, res) => {
   try {
     const bookingId = req.params.id;
@@ -126,12 +92,11 @@ const paymentProcess = async (req, res) => {
     );
     res.status(200).json({ response });
   } catch (error) {
-    console.log(error);
-    // res.status(500).json(error.response.data.message);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
-
+///<<<<<<<<<<<<<<<<<<<<<<<< BOOKING SUCCESS >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const bookingSuccess = async (req, res) => {
   const ID = req.params.id;
   try {
@@ -141,14 +106,15 @@ const bookingSuccess = async (req, res) => {
       .populate("turf");
     if (result) {
       await bookingCollection.findByIdAndUpdate(ID, { payment: "Success" });
+      await sendMail(result)
       res.status(200).json(result);
     }
   } catch (error) {
-    console.log(error);
-    res.status(500).json(error.response.data);
+    res.status(500).json(error?.response?.data);
   }
 };
 
+///<<<<<<<<<<<<<<<<<<<<<<<< BOOKING FAILED  >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const bookingFailed = async (req, res) => {
   const Id = req.params.id;
   try {
@@ -156,18 +122,17 @@ const bookingFailed = async (req, res) => {
       .findById(Id)
       .populate("user")
       .populate("turf");
-    console.log("hello iam booking failed ", result);
     if (result) {
       await bookingCollection.findByIdAndUpdate(Id, { payment: "failed" });
       res.status(200).json(result);
     }
   } catch (error) {
-    console.log(error);
+    res.status(500).json(error?.response?.data);
   }
 };
 
+///<<<<<<<<<<<<<<<<<<<<<<<< BOOKING HISTORY TO SHOW USER >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const BookingHistoryUser = async (req, res) => {
-  console.log("--------hello iam booking history");
   const userId = req.UserId;
   try {
     const data = await bookingCollection
@@ -177,26 +142,11 @@ const BookingHistoryUser = async (req, res) => {
       .sort({ createdAt: -1 });
     res.status(200).json(data);
   } catch (error) {
-    console.log(error);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
-const BookingsHistoryPartner1 = async (req, res) => {
-  const partnerId = req.partnerId;
-  console.log(partnerId,'--------------------------------------partnerId')
-  try {
-    const data = await bookingCollection
-      .find({ partner: partnerId })
-      .populate("user")
-      .populate("turf")
-      .sort({ createdAt: -1 });
-    res.status(200).json(data);
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-
+///<<<<<<<<<<<<<<<<<<<<<<<< BOOKING HISTORY TO PARTNER GET  >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const BookingsHistoryPartner = async (req, res) => {
   const partnerId = req.partnerId;
   try {
@@ -207,18 +157,16 @@ const BookingsHistoryPartner = async (req, res) => {
       .sort({ createdAt: -1 });
     res.status(200).json(data);
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: 'An error occurred while fetching booking history.' });
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
-
+///<<<<<<<<<<<<<<<<<<<<<<<< CANCEL BOOKING  >>>>>>>>>>>>>>>>>>>>>>>>>>>
 const CancelBooking = async (req, res) => {
   try {
     const bookingId = req.params.id;
-      const userId  = req.UserId
-      console.log( 'hello iam cancel------------------------------', userId);
-    const { reason} = req.body;
+    const userId = req.UserId;
+    const { reason } = req.body;
     const data = await bookingCollection.updateOne(
       { _id: bookingId },
       { $set: { cancelBooking: true, cancelReason: reason } }
@@ -229,7 +177,6 @@ const CancelBooking = async (req, res) => {
       Bookingdata[0].cancelBooking == true
     ) {
       const userdata = await userCollection.find({ _id: userId });
-      console.log(userdata);
       let walletprice = userdata[0].wallet;
       let newWalletPrice = walletprice + Bookingdata[0].price;
       await userCollection.updateOne(
@@ -238,7 +185,6 @@ const CancelBooking = async (req, res) => {
       );
     }
     res.status(200).json(data);
-    console.log(data);
   } catch (error) {
     console.log(error);
   }

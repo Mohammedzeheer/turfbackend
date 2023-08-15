@@ -1,12 +1,10 @@
 const Stripe = require("stripe");
-const dotenv =require("dotenv").config();
-
+require("dotenv").config();
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const domain = process.env.Client_Side_URL;
 
  const paymentStripe = async (price, courtName, email, id) => {
-  console.log(price, courtName, email, id);
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
     line_items: [
@@ -23,9 +21,8 @@ const domain = process.env.Client_Side_URL;
     mode: "payment",
     success_url: `${domain}/success/${id}`,
     cancel_url: `${domain}/failed/${id}`,
-    customer_email: email,
+    customer_email: email, 
   });
-
   return session.id;
 };
 

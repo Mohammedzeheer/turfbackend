@@ -6,10 +6,8 @@ const jwtUser= (req, res, next) => {
   let token = jwttoken.replace(/"/g, ''); 
   if (token) {
     try {
-      console.log(jwttoken, "jwt user -------------------------------");
       const user = jwt.verify(token, process.env.USER_TOKEN_SECRET);
       req.UserId=user.id
-      console.log(user, "jwt user -------------------------------");
       next();
     } catch (err) {
       res.status(401).json({ message: 'Invalid token' });

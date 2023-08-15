@@ -16,7 +16,7 @@ partnerRouter.get('/bookingsData',jwtPartner,bookingController.BookingsHistoryPa
 partnerRouter.get('/getCounts', jwtPartner, partnerController.totalCount);
 //POST
 partnerRouter.post('/partnersignup',partnerController.partnerSignup)
-partnerRouter.post('/partnerlogin',checkPartnerBlock,partnerController.partnerLogin)
+partnerRouter.post('/partnerlogin',partnerController.partnerLogin)
 partnerRouter.post('/otppartnersubmit', partnerController.otpPartnerSubmit)
 partnerRouter.post('/resendpartnerotp', partnerController.otpResendPartner)
 partnerRouter.post('/updateprofile',jwtPartner, partnerController.updateProfile)

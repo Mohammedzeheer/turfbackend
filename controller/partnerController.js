@@ -10,7 +10,48 @@ require("mongodb");
 require("dotenv").config();
 
 //<<<<<<<<<<<<<<<<<<<<<<  PARTNER LOGIN FUNCTION HERE >>>>>>>>>>>>>>>>>>>>>
+
 const partnerLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body; 
+
+    if (!email) {
+      return res.status(400).json({message:"Email is required" });
+    } else if (!password) {
+      return res.status(400).json({ message:"Password is required"});
+    }
+
+    const partner = await partnerCollection.findOne({ email: email });
+
+    if (!partner) {
+      return res.status(404).json({ message:"Incorrect email" });
+    }
+
+    if (partner.isApprove===false) {
+      return res.status(403).json({ message:"Not approved by admin" });
+    }
+
+    const auth = await bcrypt.compare(password, partner.password);
+
+    if (auth) {
+      const token = jwt.sign(
+        { partnerId: partner._id },
+        process.env.PARTNER_TOKEN_SECRET,
+        { expiresIn: "3d" }
+      );
+      return res.json({ login: true, token, partner });
+    } else {
+      return res.status(401).json({ message:"Incorrect password" });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+
+const partnerLogin1 = async (req, res) => {
   try {
     const { email, password } = req.body;
     const partner = await partnerCollection.findOne({ email: email });

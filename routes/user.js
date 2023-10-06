@@ -15,6 +15,8 @@ userRouter.get('/bookingSlots/:date/:id',jwtUser,bookingController.bookingSlot)
 userRouter.get('/payment/:id', bookingController.paymentProcess);
 userRouter.get('/bookings_user',jwtUser, bookingController.BookingHistoryUser);
 userRouter.get('/getMessages',jwtUser,userController.getMessages)
+userRouter.get('/getservertime',bookingController.getserverTime)
+
 //POST
 userRouter.post('/signup', userController.userSignup)
 userRouter.post('/otpcheck', userController.otpSubmit)

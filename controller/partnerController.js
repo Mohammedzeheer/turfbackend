@@ -30,7 +30,9 @@ const partnerLogin = async (req, res) => {
     if (partner.isApprove===false) {
       return res.status(403).json({ message:"Not approved by admin" });
     }
-
+    if (partner.isBlock) {
+      return res.status(403).json({ message:"You are Blocked" });
+    }
     const auth = await bcrypt.compare(password, partner.password);
 
     if (auth) {
@@ -156,7 +158,7 @@ const sendOtpToPartner = async function (req, res, next) {
     };
     mailTransporter.sendMail(docs, (err) => {
       if (err) {
-        console.log(err);
+        return res.status(500).json({ message: "Internal Server Error" });
       }
     });
   } catch (error) {

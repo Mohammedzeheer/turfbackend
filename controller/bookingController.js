@@ -190,6 +190,21 @@ const CancelBooking = async (req, res) => {
   }
 };
 
+
+const getserverTime=((req, res)=>{
+  try {
+  console.log(`hello iam servertime`)
+  const serverTime =new Date().getTime();
+  console.log(serverTime);
+ 
+  console.log('after status')
+  res.json({serverTime}); 
+  } catch (error) {
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+
 module.exports = {
   paymentProcess,
   bookTurf,
@@ -199,4 +214,25 @@ module.exports = {
   BookingHistoryUser,
   BookingsHistoryPartner,
   CancelBooking,
+  getserverTime
 };
+
+
+
+
+
+
+//   const getserverTime=(()=>{
+//     console.log(`hello iam servertime`)
+//     const serverTime = new Date();  
+
+//     const nDate = new Date().toLocaleString('en-US', {
+//       timeZone: 'Asia/Calcutta'
+//     }); 
+//     console.log(nDate);
+
+//     console.log(serverTime.toISOString() )
+//     res.status(200).json({nDate});
+//     // return res.status(200).json({ serverTime1:nDate,serverTime: serverTime.toISOString() });
+//     // res.json({ serverTime1:nDate,serverTime: serverTime.toISOString() });
+// });

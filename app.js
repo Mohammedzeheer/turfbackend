@@ -46,15 +46,14 @@ httpServer.listen(port, () => {
 });
 
 io.on('connection', (socket) => {
-  console.log('A user connected', socket.id);
-
+  // console.log('A user connected', socket.id);
   socket.on('message', (message) => {
-    console.log('Message:', message);
+    // console.log('Message:', message);
     io.emit('message', message);
   });
 
   socket.on('disconnect', () => {
-    console.log('A user disconnected', socket.id);
+    // console.log('A user disconnected', socket.id);
   });
 });
 
